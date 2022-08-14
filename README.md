@@ -1,2 +1,2 @@
-# go-time-pad
+# Go Time Pad
 Go Time Pad
