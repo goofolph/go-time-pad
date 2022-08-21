@@ -5,88 +5,40 @@ import (
 	"strings"
 )
 
-func decryptJoin(cipher string, secret string) string {
-	plain := make([]string, len(cipher), len(cipher))
-
-	// decrypt string
+func decrypt(cipher string, secret string, charset string) string {
+	message := ""
 	for i, c := range cipher {
-		c_value := int(c) - int('a')
-		s_value := int([]rune(secret)[i%len(secret)]) - int('a')
-		p_value := c_value - s_value
-		if p_value < 0 {
-			p_value += 26
+		c_value := strings.Index(charset, string(c)) // numerical value of c
+		s := secret[i%len(secret)]                   // secret character
+		s_value := strings.Index(charset, string(s)) // numerical value of s
+		m_value := c_value - s_value                 // message value
+		if m_value < 0 {                             // add charset len if negative
+			m_value += len(charset)
 		}
-		p := rune(p_value + int('a'))
-
-		plain[i] = string(p)
+		m := charset[m_value] // message character
+		message += string(m)
 	}
-
-	// return plain decrypted string
-	return strings.Join(plain, "")
+	return message
 }
 
-func decrypt(cipher string, secret string) string {
-	plain := "" // decrypted string
-
-	// decrypt string
-	for i, c := range cipher {
-		c_value := int(c) - int('a')
-		s_value := int([]rune(secret)[i%len(secret)]) - int('a')
-		p_value := c_value - s_value
-		if p_value < 0 {
-			p_value += 26
-		}
-		p := rune(p_value + int('a'))
-
-		plain += string(p)
-	}
-
-	// return plain decrypted string
-	return plain
-}
-
-func encrypt(plain string, secret string) string {
+func encrypt(message string, secret string, charset string) string {
 	cipher := ""
 
-	// encrypt string
-	for i, p := range plain {
-		p_value := int(p) - int('a')
-		s_value := int([]rune(secret)[i%len(secret)]) - int('a')
-		c_value := p_value + s_value
-		if c_value > 26 {
-			c_value -= 26
-		}
-		c := rune(c_value + int('a'))
-
+	for i, m := range message {
+		m_value := strings.Index(charset, string(m))  // numerical value of m
+		s := secret[i%len(secret)]                    // secret character
+		s_value := strings.Index(charset, string(s))  // numerical value of s
+		c_value := (m_value + s_value) % len(charset) // cipher value
+		c := charset[c_value]                         // cipher character
 		cipher += string(c)
 	}
-
-	// return plain decrypted string
 	return cipher
 }
 
 func main() {
-	// reader := bufio.NewReader(os.Stdin)
-
-	// fmt.Print("Enter ciphertext:")
-	// input, err := reader.ReadString('\n')
-	// if err != nil {
-	// 	fmt.Println("An error occured while reading input. Please try again", err)
-	// 	return
-	// }
-	// cipher := strings.TrimSuffix(input, "\n")
-
-	// fmt.Print("Enter secret:")
-	// input, err = reader.ReadString('\n')
-	// if err != nil {
-	// 	fmt.Println("An error occured while reading input. Please try again", err)
-	// 	return
-	// }
-	// secret := strings.TrimSuffix(input, "\n")
-
-	plain := "canwestrustdiscord"
-	secret := "thisisaverystrongkey"
-	cipher := encrypt(plain, secret)
-
-	fmt.Println(plain, " => ", cipher)
+	message := "HELLO"
+	secret := "XMCKL"
+	charset := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	cipher := encrypt(message, secret, charset)
+	fmt.Println(message, "+", secret, "=>", cipher)
 }
